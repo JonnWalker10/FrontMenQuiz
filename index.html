@@ -1,0 +1,570 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FrontMen Quizzz</title>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous" />
+
+
+    <style>
+        body {
+            width:100%;
+            /* height:100%; */
+        }
+        .form-signin {
+            width: 100%;
+            max-width: 330px;
+            
+            padding: 15px;
+            margin: auto;
+            margin-top:20%;
+        }
+        .hidden {
+            display:none !important; 
+        }
+        .question-box {
+            margin-top:5%;
+            height: 70%;
+        }
+        .question-box .question-placeholder {
+            height: 25%;
+        }
+        .answer-button-box .answer-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            z-index: -1;
+            opacity: 0;
+        }
+        .answer-box {
+            /* position: absolute;
+            margin: 0 auto;
+            width: 100%;
+            bottom: 10%;
+            */
+             height: 72%;
+        }
+        .answer-box > div {
+            /* position: relative; */
+            /* width: 100%; */
+            height: 50%;
+        }
+        .answer-button-box .answer-placeholder.correct {
+            background: url('images/right.png') no-repeat;
+            transition: opacity 2s;
+            opacity: 0.5;
+    background-size: contain;
+    background-position: center;
+    z-index:10; 
+        }
+        .answer-button-box .answer-placeholder.wrong {
+            background: url('images/wrong.png') no-repeat;
+            opacity: 0.5;
+    background-size: contain;
+    background-position: center;
+    transition: opacity 2s;
+    z-index:10; 
+        }
+        .answer-button {
+            width:100%;
+            height:100%;
+        }
+        .progress-box {
+            height: 10%;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        .current-score-box{
+            position: fixed;
+            top:0;
+            right:0;
+            padding:2%;
+            z-index: 10;
+            background-image: linear-gradient(to right top, #00deff, #00e9e8, #00efb9, #4ef176, #a8eb12);
+        }
+        .score-box .score-entry {
+            list-style-type: none;
+        }
+        .score-box .score-entry span {
+            width:40%;
+            display:inline-flex;
+        }
+        .score-box .score-entry .date {
+            font-size: 0.6em;
+            width: 20%;
+            
+        }
+        .score-box .score-entry .name {
+            font-size: 0.8em;
+            font-weight: bold;
+            width: 40%;
+            
+        }
+        .score-box .score-entry .score {
+            text-align: right;
+            font-size: 0.9em;
+            font-weight: bold;
+            width:10%;
+        }
+        .h-o-f-image {
+            margin: 0 auto;
+            max-width: 550px;
+            vertical-align: middle;
+            display: block;
+            width: 100%;
+        }
+
+      
+    </style>
+</head>
+
+<body class="text-center">
+    <div id="root" class="container-fluid"></div>
+
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <!-- babel is required in order to parse JSX -->
+
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <!-- import react.js -->
+
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"> </script>
+    <!-- import react-dom.js -->
+
+    <script type="text/babel">
+
+        class QuizzzPage extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            name: 'FrontMen',
+            username: '',
+            usertype: '',
+            showQuizzz: false,
+            quizzzDone:false,
+            showscore:false
+
+        };
+        //this.handleClick = this.handleClick.bind(this);
+    }
+    handleStart = (evt) => {
+
+        if(!this.ee(this.state.username)){
+            this.setState({ showQuizzz: true });
+        }
+    };
+    handleNameChange = (evt) => {       
+        this.setState({ name: evt.target.value, username: evt.target.value });
+    };    
+    ee(value){
+        if(value==='godmode'){
+            //answer is always good ;-)
+            this.setState({ usertype: 'GODMODE', name: 'I\'m a GOD', username: 'I\'m a GOD', showscore:true });
+            return false;
+        }
+        else if(value==='reset'){
+            localStorage.removeItem('quizzzstats');
+            //popout
+            this.setState({ usertype: '',name: 'Frontmen' });
+            return true;
+        }
+        else if(value==='done'){
+            this.setState({ showscore:true });
+            return false;
+        }
+        else {return false; }
+    };
+    render() {
+        const username = this.state.username;
+        const usertype = this.state.usertype;
+        const opts = {username:username,usertype:usertype};
+        if(!this.state.showQuizzz){
+            return ( 
+                <form className="form-signin">
+                    <div className="mb-4">QUIZZZ</div>
+                    <h1 className="h3 mb-3 font-weight-normal">Please sign in</h1>
+                    
+                    <input type="text" id="inputName" className="form-control" required="" autoFocus=""
+                        placeholder="Your name please"
+                        value={this.state.username}
+                        onChange={this.handleNameChange}/>
+                    <button className="btn btn-lg btn-primary btn-block" type="submit" 
+                        disabled={!this.state.username} 
+                        onClick={this.handleStart}>Sign in</button>
+                    <p className="mt-5 mb-3 text-muted">© 2018 RM</p>
+                </form>
+
+             );
+        }
+        else {
+            return ( <Quizzz userstate={opts} done={this.state.showscore} /> );
+        }
+    }
+};
+
+class Quizzz extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isToggleOn: true,
+            question: this.emptyQuestion(),
+            progress:0,
+            progresstime:0,
+            isLoaded:false,
+            userstate: {
+                name: props.userstate.username,
+                usertype: props.userstate.usertype,
+                score: 0
+            },
+            allscores:[],
+            quizzzDone: props.done || false
+        };
+        this.maxtime=30;
+        //this.userstate;
+        this.useDummy = true;
+        this.dummyq = { "response_code": 0, "results": [{ "category": "Sports", "type": "multiple", "difficulty": "medium", "question": "A stimpmeter measures the speed of a ball over what surface?", "correct_answer": "Golf Putting Green", "incorrect_answers": [" Football Pitch", "Cricket Outfield", "Pinball Table"] }] };
+        this.questions = [];
+        this.maxquestions=10;
+
+        
+
+        // This binding is necessary to make `this` work in the callback
+        this.handleClick = this.handleClick.bind(this);
+
+
+    };
+
+    //{"response_code":0,"results":[{"category":"Sports","type":"multiple","difficulty":"medium","question":"A stimpmeter measures the speed of a ball over what surface?","correct_answer":"Golf Putting Green","incorrect_answers":[" Football Pitch","Cricket Outfield","Pinball Table"]}]}
+
+    emptyQuestion() {
+        return {
+            answers: [],
+            question: '',
+        };
+    };
+    componentDidMount() {
+        if(this.state.quizzzDone){
+            if(this.state.userstate.usertype==='GODMODE'){
+                let currentState = this.state.userstate;
+                currentState.score = 100;
+                this.setState({userstate: currentState, quizzzDone:true});
+                const n = this.state.userstate.name;
+                const s = this.state.userstate.score;
+                this.getScore(n,s);
+            }else{
+                this.getScore();
+            }
+        }
+        else{
+            this.startQuestion();
+        }
+       
+    };
+    startQuestion(){
+        this.stopQuestion();
+        if(this.quizzzDone()){
+           
+            this.finalizeQuizzz();
+        }
+        else{
+            this.getQuestion(this.questions.length);
+        //start timer
+            this.intervalID = setInterval(
+                () => this.tick(),
+                1000
+            );
+        }
+    };
+    stopTimer(){
+        clearInterval(this.intervalID);
+    }
+    stopQuestion(){
+        this.stopTimer();
+        
+        this.setState({
+                isLoaded: false,
+                progresstime: 0, 
+                progress:0
+            });
+    }
+    calcProgress(progresstime){
+        return Math.ceil(100/this.maxtime * progresstime);
+    }
+    tick(){
+        const progresstime = this.state.progresstime;
+        if(progresstime<=this.maxtime){
+            this.setState({
+                progresstime: progresstime+1,
+                progress: this.calcProgress(progresstime+1)
+            });
+        }
+        else{
+            //times up
+
+            this.startQuestion();
+        }
+    };
+
+    componentWillUnmount() {
+        this.stopQuestion();
+    }
+
+    uniqueQuestion(obj) {
+        if(this.useDummy){
+            this.questions.push(obj);
+            return true;
+        }
+        else{
+            if (!this.questions.some(e => e.question === obj.question)) {
+                this.questions.push(obj);
+                return true;
+            }
+            else { return false; }
+        }
+    };
+    addQuestion(q) {
+        console.log(q);
+        
+        const answerlist = [];
+        answerlist.push(...q.incorrect_answers);
+        answerlist.splice(Math.random() * 3, 0, q.correct_answer);
+
+        q.answers = [];
+        for(let i=0; i<answerlist.length;i++){
+            q.answers[i]={answer:answerlist[i]};
+        }        
+
+        console.log(q);
+        this.setState({
+            isLoaded: true,
+            question: q
+        });
+
+    };
+    getQuestion(param) {
+        console.log('getting question: ' + param);
+
+        fetch('https://opentdb.com/api.php?amount=1')
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    console.log(result.results[0]);
+
+                    if (this.uniqueQuestion(result.results[0])) {
+
+                        const newQuestion = result.results[0];
+
+                        this.addQuestion(newQuestion);
+                    }
+                    else {
+                        this.getQuestion('retry');
+                    }
+                },
+                // Note: it's important to handle errors here
+                // instead of a catch() block so that we don't swallow
+                // exceptions from actual bugs in components.
+                (error) => {
+                    console.log('errorororororrororor');
+                    if (this.useDummy) {
+                        if (this.uniqueQuestion(this.dummyq.results[0])) {
+                            this.addQuestion(this.dummyq.results[0]);
+                        }
+
+                    }
+                    else {
+                        this.setState({
+                            isLoaded: true,
+                            error
+                        });
+                    }
+
+                }
+            )
+
+    };
+    quizzzDone(){
+        return this.questions.length === this.maxquestions;
+    }
+    validateItem(answer){
+        const validanswer = this.state.question.correct_answer === answer.answer;
+        const currQuestion = this.state.question;
+        
+        for(let i=0; i < currQuestion.answers.length; i++){
+            let choosen = currQuestion.answers[i].answer===answer.answer;
+            currQuestion.answers[i].choosen_answer=choosen;
+            currQuestion.answers[i].correct=choosen && validanswer;
+            
+        }
+        this.setState({question:currQuestion});
+
+        return validanswer;
+    };
+    handleClick(item, e) {
+
+        //disable buttons
+        this.setState({isLoaded:false});
+        //stop timer
+        this.stopTimer();
+        //validate answer
+        const correct = this.validateItem(item);
+        console.log('answer: '+ item + ' on question: '+this.questions.length + ' is '+correct?'correct':'not correct' );
+        const updateUserstate = this.state.userstate;
+        updateUserstate.score += correct ? 1 : 0;
+
+        this.setState(state => ({
+            userstate: updateUserstate
+        }));
+
+        setTimeout(() => {
+            if(this.quizzzDone()){
+                
+                this.finalizeQuizzz();
+
+            }
+            else{
+                // get the next question
+                this.startQuestion();
+            }
+        }, 1000);
+    };
+    finalizeQuizzz(){
+    
+            //show score and save locally
+            const n = this.state.userstate.name;
+            const s = this.state.userstate.score;
+            
+            this.getScore(n,s);
+            
+            this.stopQuestion();
+    };
+    getScore(name, score){
+        var ts = localStorage.getItem('quizzzstats');
+            if(!ts){
+                ts = [];
+            }
+            else{
+                ts = JSON.parse(ts);
+            }
+            if(name && score){
+                ts.push({'username':name,'score':score, date: new Date().toLocaleDateString()});
+            }
+            ts.sort(this.scoresorter);
+            localStorage.setItem('quizzzstats',JSON.stringify(ts));
+            
+            var scores = JSON.parse(localStorage.getItem('quizzzstats'));
+            
+            this.setState({
+                allscores :scores,
+                showQuizzz:false,
+                quizzzDone:true});
+
+    };
+    scoresorter(a,b){
+        var returnval = 0;
+        if(a.score === b.score){
+            returnval= a.date < b.date ? 1:a.date > b.date?-1:0;
+        }
+        else{ returnval = a.score < b.score ? 1 : -1 }
+        return returnval;
+    }
+    
+    render() {
+       
+               const u = this.state.userstate;
+        var opts = {};
+        
+        if(!this.state.isLoaded){
+            opts.disabled = 'disabled';
+        }
+
+        if(!this.state.quizzzDone){
+
+            const style = {
+                width: this.state.progress+'%'
+            }
+            const q = this.state.question;
+
+            return (
+                <div className="question-box">
+                    <div className="row question-placeholder ">
+                        <div className="col-12">
+                            <div className="current-score-box">
+                                <div>Naam: {u.name}</div>
+                                <div>Score: {u.score}</div>
+                            </div>                            
+                        </div>
+                        <div className="col-12">Lets go {u.name}! Question {this.questions.length}:</div>
+                        <div className="col-12"><h5>{q.question}</h5></div>
+                    </div>
+
+                    <div className="row answer-box">
+                        
+                            {q.answers.length>0 && q.answers.map((key,index) => (
+                                
+                                <div className="col-6 answer-button-box" key={index}>
+                                    <div className={key.choosen_answer?(key.correct?'answer-placeholder correct':'answer-placeholder wrong'):'answer-placeholder'}></div>
+                                    <button type='button' className="answer-button" {...opts} onClick={(e) => this.handleClick(key, e)}>{key.answer}</button>
+                                </div>
+                            ))}
+                        
+                    </div>
+
+                    <div className="row progress-box">
+                        <div className="progress-bar" style={style}></div>
+                    </div>
+                </div>
+            );
+        }
+        else{
+
+let header;
+if(u.name !== 'done'){
+header = <div>
+                        <h4>Final Score</h4>
+                        Current player: {u.name}: {u.score}
+                    </div>;
+}
+
+
+            return (
+                <div>
+                    {header}                    
+                    <div>                
+                        <img className="h-o-f-image" src="https://2fnwas1oea9y31r31yme9a19-wpengine.netdna-ssl.com/wp-content/themes/decibelmag/images/dBHallOfFameLogo.png"/>
+                        <ul className="score-box">                            
+                            {this.state.allscores.map((item,index) => (
+                                <li className="score-entry" key={item.username+index}>
+                                    <span className="date">{item.date}</span>
+                                    <span className="name">{item.username}</span> : <span className="score">{item.score}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            );
+        }
+    }
+}
+            
+ReactDOM.render(<QuizzzPage />,document.getElementById('root'));
+
+
+      </script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+        crossorigin="anonymous"></script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+
+</body>
+
+</html>
